@@ -1,0 +1,67 @@
+version: '3'
+
+services:
+  certbot:
+    image: certbot/certbot
+    restart: unless-stopped
+    volumes:
+      - ./volumes/certbot/conf:/etc/letsencrypt
+      - ./volumes/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    volumes:
+      - ./volumes/html:/html
+      - ./volumes/nginx/conf.d:/etc/nginx/conf.d
+      - ./volumes/certbot/conf:/etc/letsencrypt:ro
+      - ./volumes/certbot/www:/var/www/certbot:ro
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - backend
+
+  mongo:
+    image: mongo:4
+    container_name: ${MONGODB_CONTAINER}
+    expose:
+      - ${MONGODB_PORT}
+    ports:
+      - ${MONGODB_PORT}:${MONGODB_PORT}
+    command: [
+      "mongod",
+      "--port", "${MONGODB_PORT}",
+      "--auth"
+    ]
+    volumes:
+      - ./volumes/mongo/data:/data/db
+    networks:
+      - backend
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "${MONGODB_USER}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGODB_PASS}"
+
+  mongo-express:
+    image: mongo-express
+    # no build
+    container_name: ${ME_CONTAINER}
+    ports:
+      - 8081:8081
+    depends_on:
+      - mongo
+    networks:
+      - backend
+    environment:
+      ME_CONFIG_BASICAUTH_USERNAME: "${ME_CONFIG_BASICAUTH_USERNAME}"
+      ME_CONFIG_BASICAUTH_PASSWORD: "${ME_CONFIG_BASICAUTH_PASSWORD}"
+      ME_CONFIG_MONGODB_ADMINUSERNAME: "${MONGODB_USER}"
+      ME_CONFIG_MONGODB_ADMINPASSWORD: "${MONGODB_PASS}"
+      ME_CONFIG_MONGODB_PORT: "${MONGODB_PORT}"
+      ME_CONFIG_MONGODB_SERVER: "${MONGODB_HOST}"
+      ME_CONFIG_MONGODB_PORT: "${MONGODB_PORT}"
+
+networks: 
+  backend:

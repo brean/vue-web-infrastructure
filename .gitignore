@@ -1,0 +1,4 @@
+.env
+volumes/certbot/conf/
+volumes/certbot/www/
+volumes/mongo/data/*
