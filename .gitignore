@@ -3,3 +3,4 @@ certbot/conf/
 certbot/www/
 data/*
 node_modules/
+app/client/dist/

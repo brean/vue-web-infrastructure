@@ -5,7 +5,7 @@ run:
 	docker-compose up -d mongo mongo-express
 	docker-compose build build-vue
 	docker-compose run build-vue
-	docker-compose up -d express-node 
+	docker-compose up -d nginx
 
 down:
 	docker-compose down

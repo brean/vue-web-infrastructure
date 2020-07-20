@@ -1,28 +1,21 @@
 version: '3'
 
 services:
-  certbot:
-    image: certbot/certbot
-    restart: unless-stopped
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-    networks:
-      - backend
-
   nginx:
     image: nginx:latest
     container_name: nginx
     restart: always
+    depends_on: 
+      - mongo
+      - mongo-express
     volumes:
-      - ./nginx/html:/html
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./certbot/conf:/etc/letsencrypt:ro
-      - ./certbot/www:/var/www/certbot:ro
+      - ./nginx/html/root:/html/root
+      - ./app/client/dist:/html/app:ro
+      - ./nginx/conf.d/app.conf:/etc/nginx/conf.d/app.conf:ro
+      - ./nginx/conf.d/main.conf:/etc/nginx/conf.d/main.conf:ro
+      - ./nginx/conf.d/mongo.conf:/etc/nginx/conf.d/mongo.conf:ro
     ports:
       - 80:80
-      - 443:443
     networks:
       - backend
 
@@ -50,8 +43,6 @@ services:
     image: mongo-express
     # no build
     container_name: ${ME_CONTAINER}
-    ports:
-      - 8081:8081
     depends_on:
       - mongo
     networks:
@@ -66,14 +57,18 @@ services:
       ME_CONFIG_MONGODB_PORT: "${MONGODB_PORT}"
 
   build-vue:
-    image: node:carbon
+    image: node
+    command: ["make"]
+    working_dir: "/app"
+    environment: 
+      NODE_ENV: "production"
     volumes:
-      - 
-    # TODO: build and deploy to nginx
+      - ./app/client:/app
+    networks:
+      - backend
 
-  express-server:
+  express-node:
     image: node:latest
-    # TODO: run server service
     environment: 
       ME_CONFIG_MONGODB_ADMINUSERNAME: "${MONGODB_USER}"
       ME_CONFIG_MONGODB_ADMINPASSWORD: "${MONGODB_PASS}"
