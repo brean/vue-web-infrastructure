@@ -5,8 +5,8 @@ services:
     image: certbot/certbot
     restart: unless-stopped
     volumes:
-      - ./volumes/certbot/conf:/etc/letsencrypt
-      - ./volumes/certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
     networks:
       - backend
@@ -16,10 +16,10 @@ services:
     container_name: nginx
     restart: always
     volumes:
-      - ./volumes/nginx/html:/html
-      - ./volumes/nginx/conf.d:/etc/nginx/conf.d
-      - ./volumes/certbot/conf:/etc/letsencrypt:ro
-      - ./volumes/certbot/www:/var/www/certbot:ro
+      - ./nginx/html:/html
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
     ports:
       - 80:80
       - 443:443
@@ -39,7 +39,7 @@ services:
       "--auth"
     ]
     volumes:
-      - ./volumes/mongo/data:/data/db
+      - ./data:/data/db
     networks:
       - backend
     environment:
@@ -59,6 +59,22 @@ services:
     environment:
       ME_CONFIG_BASICAUTH_USERNAME: "${ME_CONFIG_BASICAUTH_USERNAME}"
       ME_CONFIG_BASICAUTH_PASSWORD: "${ME_CONFIG_BASICAUTH_PASSWORD}"
+      ME_CONFIG_MONGODB_ADMINUSERNAME: "${MONGODB_USER}"
+      ME_CONFIG_MONGODB_ADMINPASSWORD: "${MONGODB_PASS}"
+      ME_CONFIG_MONGODB_PORT: "${MONGODB_PORT}"
+      ME_CONFIG_MONGODB_SERVER: "${MONGODB_HOST}"
+      ME_CONFIG_MONGODB_PORT: "${MONGODB_PORT}"
+
+  build-vue:
+    image: node:carbon
+    volumes:
+      - 
+    # TODO: build and deploy to nginx
+
+  express-server:
+    image: node:latest
+    # TODO: run server service
+    environment: 
       ME_CONFIG_MONGODB_ADMINUSERNAME: "${MONGODB_USER}"
       ME_CONFIG_MONGODB_ADMINPASSWORD: "${MONGODB_PASS}"
       ME_CONFIG_MONGODB_PORT: "${MONGODB_PORT}"

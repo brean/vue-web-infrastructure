@@ -1,4 +1,5 @@
 .env
-volumes/certbot/conf/
-volumes/certbot/www/
-volumes/mongo/data/*
+certbot/conf/
+certbot/www/
+data/*
+node_modules/
