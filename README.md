@@ -16,8 +16,10 @@ Including these docker-container:
 ## Configuration
 
 - Change usernames and passwords in the `env-template` file and save it as `.env`.
-- Change mydomain.com to your domain in `volumes/nginx/conf.d/app.conf`.
-- Change mydomain.com in the init-letsencrypt.sh
+- Change mydomain.com to your domain in `volumes/nginx/conf.d/*.conf` and comment out all SSL-stuff.
+- Change mydomain.com in the `init-letsencrypt.sh` file and make sure your E-Mail in there is valid (to receive warnings about the certificate from Letsencrypt).
+- Run `./init-letsencrypt.sh` to set up SSL.
+- Reactivate the SSL-stuff from `volumes/nginx/conf.d/*.conf` and restart nginx.
 
 ## Build on server
 
