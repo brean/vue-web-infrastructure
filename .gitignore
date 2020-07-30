@@ -1,6 +1,6 @@
 .env
-certbot/conf/
-certbot/www/
+volumes/certbot/conf/
+volumes/certbot/www/
 data/*
 node_modules/
 app/client/dist/
