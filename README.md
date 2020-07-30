@@ -17,6 +17,7 @@ Including these docker-container:
 
 - Change usernames and passwords in the `env-template` file and save it as `.env`.
 - Change mydomain.com to your domain in `volumes/nginx/conf.d/app.conf`.
+- Change mydomain.com in the init-letsencrypt.sh
 
 ## Build on server
 
